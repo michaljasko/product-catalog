@@ -53,6 +53,8 @@ class Image(models.Model):
     obrazek = models.URLField(max_length=255)
 
     def __str__(self):
+        if self.nazev:
+            return f'{self.obrazek} ({self.nazev})'
         return self.obrazek
 
 
