@@ -1,6 +1,6 @@
 from django.urls import path
-# from system.views import
+from system.views import import_data
 
-# urlpatterns = [
-
-# ]
+urlpatterns = [
+    path('import', import_data, name='import_data')
+]
