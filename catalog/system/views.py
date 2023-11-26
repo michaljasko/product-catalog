@@ -8,7 +8,7 @@ from system.serializers import (AttributeNameSerializer, AttributeValueSerialize
                                 ProductImageSerializer, CatalogSerializer)
 from system.utils import (import_attribute_name, import_attribute_value, import_attribute, import_product,
                           import_product_attributes, import_image, import_product_image, import_catalog,
-                          get_object_list)
+                          get_object_list, get_object_detail)
 
 
 @api_view(['POST'])
@@ -59,9 +59,10 @@ def import_data(request):
 @api_view(['GET'])
 def model_list(request, model_name):
     # Check provided model name
-    if not model_name or not isinstance(model_name, str):
+    if not isinstance(model_name, str):
         return Response({"error": "Model name missing or invalid"}, status=400)
 
+    # Make the search case-insensitive
     name = model_name.lower()
     # Look for expected model names
     if name == "attributename":
@@ -83,9 +84,39 @@ def model_list(request, model_name):
     else:
         return Response({"error": "Invalid model name provided"}, status=400)
 
-    return Response({f"{model_name}": result}, status=200)
+    return Response({"items": result}, status=200)
 
 
 @api_view(['GET'])
 def model_detail(request, model_name, item_id):
-    pass
+    # Check provided model name
+    if not isinstance(model_name, str):
+        return Response({"error": "Model name missing or invalid"}, status=400)
+
+    # Make the search case-insensitive
+    name = model_name.lower()
+    # Look for expected model names
+    if name == "attributename":
+        result = get_object_detail(AttributeName, item_id, AttributeNameSerializer)
+    elif name == "attributevalue":
+        result = get_object_detail(AttributeValue, item_id, AttributeValueSerializer)
+    elif name == "attribute":
+        result = get_object_detail(Attribute, item_id, AttributeSerializer)
+    elif name == "product":
+        result = get_object_detail(Product, item_id, ProductSerializer)
+    elif name == "productattributes":
+        result = get_object_detail(ProductAttributes, item_id, ProductAttributesSerializer)
+    elif name == "image":
+        result = get_object_detail(Image, item_id, ImageSerializer)
+    elif name == "productimage":
+        result = get_object_detail(ProductImage, item_id, ProductImageSerializer)
+    elif name == "catalog":
+        result = get_object_detail(Catalog, item_id, CatalogSerializer)
+    else:
+        return Response({"error": "Invalid model name provided"}, status=400)
+
+    # If object was not found
+    if result is None:
+        return Response({"error": f"{model_name} with ID {item_id} not found"}, status=400)
+
+    return Response({"item": result})

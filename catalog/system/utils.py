@@ -2,12 +2,19 @@ from collections.abc import Iterable
 from datetime import datetime
 from decimal import Decimal
 from typing import Union
-from system.models import (Attribute, AttributeName, AttributeValue, Product,
-                           ProductAttributes, Image, ProductImage, Catalog)
+from system.models import (Attribute, AttributeName, AttributeValue, Product, ProductAttributes, Image,
+                           ProductImage, Catalog)
+from system.serializers import (AttributeNameSerializer, AttributeValueSerializer, AttributeSerializer,
+                                ProductSerializer, ProductAttributesSerializer, ImageSerializer,
+                                ProductImageSerializer, CatalogSerializer)
 
-# Define the type for system model classes
-SystemModel = Union[Attribute, AttributeName, AttributeValue, Product,
-                  ProductAttributes, Image, ProductImage, Catalog]
+
+# Define the types for system model classes and serializers
+SystemModel = Union[Attribute, AttributeName, AttributeValue, Product, ProductAttributes, Image,
+                    ProductImage, Catalog]
+SystemModelSerializer = Union[AttributeNameSerializer, AttributeValueSerializer, AttributeSerializer,
+                              ProductSerializer, ProductAttributesSerializer, ImageSerializer,
+                              ProductImageSerializer, CatalogSerializer]
 
 
 def set_up_import(data: dict, model: SystemModel, required_keys: set[str]) -> Union[SystemModel, None]:
@@ -269,3 +276,16 @@ def get_object_list(model: SystemModel) -> list:
         result.append({"id": item.id, "item": str(item)})
 
     return result
+
+
+def get_object_detail(model: SystemModel, item_id: int, serializer: SystemModelSerializer) -> Union[dict, None]:
+    """
+    Return serialized object for given system model class and ID, None if not found.
+    """
+    try:
+        item = model.objects.get(id=item_id)
+    except model.DoesNotExist:
+        return None
+    serializer_result = serializer(item)
+
+    return serializer_result.data
