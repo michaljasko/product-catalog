@@ -257,3 +257,15 @@ def import_catalog(data: dict) -> bool:
     catalog.save()
 
     return True
+
+
+def get_object_list(model: SystemModel) -> list:
+    """
+    Return list of all objects for given system model class.
+    """
+    result = []
+
+    for item in model.objects.all():
+        result.append({"id": item.id, "item": str(item)})
+
+    return result

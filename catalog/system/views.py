@@ -1,8 +1,14 @@
 from collections.abc import Iterable
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from system.models import (Attribute, AttributeName, AttributeValue, Product, ProductAttributes, Image,
+                           ProductImage, Catalog)
+from system.serializers import (AttributeNameSerializer, AttributeValueSerializer, AttributeSerializer,
+                                ProductSerializer, ProductAttributesSerializer, ImageSerializer,
+                                ProductImageSerializer, CatalogSerializer)
 from system.utils import (import_attribute_name, import_attribute_value, import_attribute, import_product,
-                          import_product_attributes, import_image, import_product_image, import_catalog)
+                          import_product_attributes, import_image, import_product_image, import_catalog,
+                          get_object_list)
 
 
 @api_view(['POST'])
@@ -48,3 +54,38 @@ def import_data(request):
 
     return Response({"message": f"Successfully processed {len(request.data)} items",
                      "created": created, "skipped": skipped}, status=200)
+
+
+@api_view(['GET'])
+def model_list(request, model_name):
+    # Check provided model name
+    if not model_name or not isinstance(model_name, str):
+        return Response({"error": "Model name missing or invalid"}, status=400)
+
+    name = model_name.lower()
+    # Look for expected model names
+    if name == "attributename":
+        result = get_object_list(AttributeName)
+    elif name == "attributevalue":
+        result = get_object_list(AttributeValue)
+    elif name == "attribute":
+        result = get_object_list(Attribute)
+    elif name == "product":
+        result = get_object_list(Product)
+    elif name == "productattributes":
+        result = get_object_list(ProductAttributes)
+    elif name == "image":
+        result = get_object_list(Image)
+    elif name == "productimage":
+        result = get_object_list(ProductImage)
+    elif name == "catalog":
+        result = get_object_list(Catalog)
+    else:
+        return Response({"error": "Invalid model name provided"}, status=400)
+
+    return Response({f"{model_name}": result}, status=200)
+
+
+@api_view(['GET'])
+def model_detail(request, model_name, item_id):
+    pass

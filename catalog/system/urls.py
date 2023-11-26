@@ -1,6 +1,8 @@
 from django.urls import path
-from system.views import import_data
+from system.views import import_data, model_list, model_detail
 
 urlpatterns = [
-    path('import', import_data, name='import_data')
+    path('import', import_data, name='import_data'),
+    path('detail/<str:model_name>/', model_list, name='model_list'),
+    path('detail/<str:model_name>/<int:item_id>', model_detail, name='model_detail'),
 ]
