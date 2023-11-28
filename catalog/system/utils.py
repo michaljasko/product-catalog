@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from django.apps import apps
 from datetime import datetime
 from decimal import Decimal
 from typing import Union
@@ -15,6 +16,19 @@ SystemModel = Union[Attribute, AttributeName, AttributeValue, Product, ProductAt
 SystemModelSerializer = Union[AttributeNameSerializer, AttributeValueSerializer, AttributeSerializer,
                               ProductSerializer, ProductAttributesSerializer, ImageSerializer,
                               ProductImageSerializer, CatalogSerializer]
+
+
+# Mapping of model names to their serializers
+SERIALIZERS = {
+    "AttributeName": AttributeNameSerializer,
+    "AttributeValue": AttributeValueSerializer,
+    "Attribute": AttributeSerializer,
+    "Product": ProductSerializer,
+    "ProductAttributes": ProductAttributesSerializer,
+    "Image": ImageSerializer,
+    "ProductImage": ProductImageSerializer,
+    "Catalog": CatalogSerializer,
+}
 
 
 def set_up_import(data: dict, model: SystemModel, required_keys: set[str]) -> Union[SystemModel, None]:
@@ -264,6 +278,22 @@ def import_catalog(data: dict) -> bool:
     catalog.save()
 
     return True
+
+
+def get_model_by_name(model_name: str) -> Union[SystemModel, None]:
+    """
+    Return system model by its name, None if model could not be found.
+    """
+    # Check provided model name
+    if not isinstance(model_name, str):
+        return None
+
+    # Search for a model by model name
+    try:
+        model = apps.get_model("system", model_name)
+        return model
+    except LookupError:
+        return None
 
 
 def get_object_list(model: SystemModel) -> list:
